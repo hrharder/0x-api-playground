@@ -9,14 +9,20 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-func (c *Client) Quote(sellToken string, buyToken string, sellAmount string, buyAmount string) (*SwapResponse, error) {
+func (c *Client) Quote(sellToken string, buyToken string, sellAmount *big.Int, buyAmount *big.Int) (*SwapResponse, error) {
 	response := new(SwapResponse)
-	rawRes, err := c.get("swap", 0, "quote", Args{
-		"buyToken":   buyToken,
-		"buyAmount":  buyAmount,
-		"sellToken":  sellToken,
-		"sellAmount": sellAmount,
-	})
+	args := Args{
+		"buyToken":  buyToken,
+		"sellToken": sellToken,
+	}
+	if sellAmount != nil {
+		args["sellAmount"] = sellAmount.String()
+	}
+	if buyAmount != nil {
+		args["buyAmount"] = buyAmount.String()
+	}
+
+	rawRes, err := c.get("swap", 0, "quote", args)
 	if err != nil {
 		return nil, fmt.Errorf("(client) failed to fetch quote: %w", err)
 	}
